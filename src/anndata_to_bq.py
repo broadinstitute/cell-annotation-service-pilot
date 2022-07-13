@@ -18,26 +18,28 @@ def dump_core_matrix(x, row_lookup, col_lookup):
     start = current_milli_time()
     with gzip.open('cas_raw_counts.tsv.gz', 'wt') as f:
         f.write("cas_cell_index\tcas_feature_index\tdata\n")
-        
-        cx = x.tocoo(copy=False)
-        for i, j, v in zip(cx.row, cx.col, cx.data):
-            cas_cell_index = row_lookup[i]
-            cas_feature_index = col_lookup[j]
+
+        for r in range(x.shape[0]):
+            row = x[r]
+            for c in row.indices:
+                cas_cell_index = row_lookup[r]
+                cas_feature_index = col_lookup[c]
+                v = x[r, c]
             
-            # Todo -- how can we ensure this is safe/right?
-            v_int = int(v)
-            f.write(f"{cas_cell_index}\t{cas_feature_index}\t{v_int}\n")
-            counter = counter + 1
-            if counter % 1000000 == 0:
-                end = current_milli_time()
-                print(f"    Processed {counter} rows... in {end-start} ms")
-                start = end
+                # Todo -- how can we ensure this is safe/right?
+                v_int = int(v)
+                f.write(f"{cas_cell_index}\t{cas_feature_index}\t{v_int}\n")
+                counter = counter + 1
+                if counter % 1000 == 0:
+                    end = current_milli_time()
+                    print(f"    Processed {counter} rows... in {end-start} ms")
+                    start = end
 
 
 def process(input_file, cas_cell_index_start, cas_feature_index_start):
     print("Loading data...")
-    adata = ad.read(input_file)
-    
+    adata = ad.read(input_file, backed='r')
+
     # dump out cell info (obs) -- cell_id is index (26 columns)
     print("Processing cell/observation metadata...")
     adata.obs['original_cell_id'] = adata.obs.index    
