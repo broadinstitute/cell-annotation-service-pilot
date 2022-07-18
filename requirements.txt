@@ -1,5 +1,7 @@
+anndata~=0.8.0
+fastavro
 google-api-python-client
 google-cloud-bigquery
-numpy~=1.23.0
-anndata~=0.8.0
-scipy~=1.8.1
+google-cloud-storage
+numpy~=1.23.1
+scipy
